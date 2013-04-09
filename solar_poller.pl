@@ -54,17 +54,9 @@ $config->define( "sendhex_initialise=s"   );
 $config->define( "sendhex_serial=s"       );
 $config->define( "sendhex_conf_serial1=s" );
 $config->define( "sendhex_conf_serial2=s" );
-$config->define( "sendhex_version=s"     );
-$config->define( "sendhex_paramfmt=s"    );
-$config->define( "sendhex_param=s"       );
-$config->define( "sendhex_datafmt=s"     );
 $config->define( "sendhex_data=s"        );
 $config->define( "recvhex_serial=s"      );
 $config->define( "recvhex_conf_serial=s" );
-$config->define( "recvhex_version=s"     );
-$config->define( "recvhex_paramfmt=s"    );
-$config->define( "recvhex_param=s"       );
-$config->define( "recvhex_datafmt=s"     );
 $config->define( "recvhex_data=s"        );
 $config->define( "data_vpv1_hexcode=s"  );
 $config->define( "data_vpv1_multiply=s"  );
@@ -407,65 +399,6 @@ sub writeReadBuffer() {
   
   return "";
 } #end writeReadBuffer
-
-#######################################################################
-#
-# Prepare the REQUEST_CONF_SERIAL packet
-# grab serial# from input data, use it to create the response packet, incl checksum in format:
-# sendhex_conf_serial1 + $hexSerial + sendhex_conf_serial2 + $hexReqChkSum
-#
-sub calcReqConfSerial() {
-  my $hexStr = shift;
-  my $hexSerial = substr($hexStr, $config->hex_confserial_index, $config->hex_serial_length);
-  $HASH{SERIAL} = pack ("H*", $hexSerial);
-  my $hexReqRegex = $config->sendhex_conf_serial1 . $hexSerial . $config->sendhex_conf_serial2;
-
-  if ($config->flags_debug) {
-    print "hexSerial=$hexSerial\n";          # decimal string
-    print "SERIAL=$HASH{SERIAL}\n";          # hexadecimal string, for pvoutput.org
-  }
-
-  #
-  # calculate hex checksum for the request
-  #
-  my $rawReq = &convHexToRaw( $hexReqRegex );
-  my $rawReqChkSum = unpack ( "%C*", $rawReq );
-  my $hexReqChkSum = sprintf ( "%04x ", $rawReqChkSum );
-
-  #
-  # join it all together to create the request
-  #
-  my $reqConfSerial = $hexReqRegex . $hexReqChkSum;
-  return($reqConfSerial);
-} #end calcReqConfSerial
-
-#######################################################################
-#
-# Initialise Inverter - handshake is done here
-#
-sub initialiseInverter() {
-  #
-  # step 1: Start initial handshake with inverter (reset network)
-  #
-  my $rawRequest = &convHexToRaw($config->sendhex_initialise);
-  print "Send -> req init inverter: " . $config->sendhex_initialise . "\n";
-  &writeToPort($rawRequest);
-
-  #
-  # step 2: request the serial number (query network)
-  #
-  print "Send -> req serial: " . $config->sendhex_serial . "\n";
-  my $hexResponse = &writeReadBuffer($config->sendhex_serial,$config->recvhex_serial);
-
-  #
-  # step 3: confirm the serial number
-  #
-  if ( $hexResponse ne "" ) {
-    my $confSerialRequest = &calcReqConfSerial($hexResponse);
-    print "Send -> confirm serial: $confSerialRequest \n";
-    my $hexResponse2 = &writeReadBuffer($confSerialRequest,$config->recvhex_conf_serial);
-  }
-} #end initialiseInverter
 
 #######################################################################
 #
