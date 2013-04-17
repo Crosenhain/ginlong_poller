@@ -2,6 +2,8 @@
 
 use warnings;
 use AppConfig;  # used to read from a config file
+use WWW::Curl::Easy;
+use POSIX qw(strftime);
 
 $| = 1;         # don't let Perl buffer I/O
 
@@ -18,6 +20,9 @@ my $config = AppConfig->new();
 
 # define new variables
 $config->define( "flags_debug!"          );
+$config->define( "flags_pvoutput!"	 );
+$config->define( "flags_pvoutputkey=s"	 );
+$config->define( "flags_pvoutputid=s"	 );
 $config->define( "secs_timeout=s"        );
 $config->define( "secs_reinit=s"         );
 $config->define( "time_start_poll=s"     );
@@ -372,7 +377,6 @@ sub writeReadBuffer() {
   # Reset number of noTalks & attempt ReInit
   #
   if ( $noTalks > 0 ) {
-    #&setPollTimes();
     &closeSerialPort();
     #
     # check if reinitialise port timeout was reached, if so die
@@ -467,11 +471,38 @@ sub parseData() {
          } else {
            $HoH{$key}{VALUE} = hex( $d[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
          }
-         printf " %s:%s", $key, $HoH{$key}{VALUE}, $HoH{$key}{MEAS} ;
+	 if ($config->flags_pvoutput) {
+	 	 #do nothing here
+	 } else {
+	         printf " %s:%s", $key, $HoH{$key}{VALUE}, $HoH{$key}{MEAS} ;
+	 }
        }
   }
   my $wattage = $HoH{VAC}{VALUE} * $HoH{IAC}{VALUE};
-  printf " WAC:%s", $wattage ;
+  if ($config->flags_pvoutput) {
+	my $pvdata = "data=".(strftime "%Y%m%d", localtime).",".$wattage;
+  	#we're using curl to send the data to pvoutput
+	my $curl = WWW::Curl::Easy->new;
+	$curl->setopt(CURLOPT_HEADER,1);
+	$curl->setopt(CURLOPT_HTTPHEADER, ["X-Pvoutput-Apikey: ".$config->flags_pvoutputkey , "X-Pvoutput-SystemId: ".$config->flags_pvoutputid] );
+	$curl->setopt(CURLOPT_POST,1);
+	$curl->setopt(CURLOPT_POSTFIELDS,$pvdata);
+	$curl->setopt(CURLOPT_URL, 'http://pvoutput.org/service/r2/addoutput.jsp');
+	if ($config->flags_debug) {
+		$curl->setopt(CURLOPT_VERBOSE,1);
+	}
+	# Starts the actual request
+        my $retcode = $curl->perform;
+	if ($retcode == 0) {
+		print("Transfer went ok\n");
+                my $response_code = $curl->getinfo(CURLINFO_HTTP_CODE);
+	} else {
+                # Error code, type of error, error message
+                print("An error happened: $retcode ".$curl->strerror($retcode)." ".$curl->errbuf."\n");
+	}
+  } else {
+  	printf " WAC:%s", $wattage ;
+  }
 
 } #end parseData
 
@@ -487,7 +518,6 @@ sub main() {
      &initialiseSerialPort();
 
      #print "Send -> req data as at " . &getDateTime() . " : " . $config->sendhex_data . "\n";
-     #&setPollTimes();
      $hexResponse = &writeReadBuffer($config->sendhex_data,$config->recvhex_data);
      &parseData($hexResponse) if ($hexResponse ne "");
 
