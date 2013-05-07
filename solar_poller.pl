@@ -458,9 +458,11 @@ sub parseData() {
   my $data = substr( $hexData, $startIndex, $numOfChars );
   #print "data: $data\n";
   my $lastEtoday = $HoH{ETODAY}{VALUE};
-  
+   
   # split hex string into an array of 4char hex strings
   @d = ( $data =~ m/..?.?.?/g );
+
+  my $finalOutput="";
 
   # display data values - sort %HoH by INDEX
   for $key ( sort {$HoH{$a}{INDEX} <=> $HoH{$b}{INDEX} } keys ( %HoH ) ) {
@@ -474,7 +476,8 @@ sub parseData() {
 	 if ($config->flags_pvoutput) {
 	 	 #do nothing here
 	 } else {
-	         printf " %s:%s", $key, $HoH{$key}{VALUE}, $HoH{$key}{MEAS} ;
+	         #printf " %s:%s", $key, $HoH{$key}{VALUE}, $HoH{$key}{MEAS} ;
+		$finalOutput .= $key.":".$HoH{$key}{VALUE}." ";
 	 }
        }
   }
@@ -501,7 +504,9 @@ sub parseData() {
                 print("An error happened: $retcode ".$curl->strerror($retcode)." ".$curl->errbuf."\n");
 	}
   } else {
-  	printf " WAC:%s", $wattage ;
+  	#printf " WAC:%s", $wattage ;
+	$finalOutput .= "WAC:".$wattage;
+	printf $finalOutput;
   }
 
 } #end parseData
