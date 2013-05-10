@@ -87,12 +87,12 @@ $config->define( "data_ipv2_measure=s"  );
 $config->define( "data_ipv2_index=s"  );
 $config->define( "data_ipv2_descr=s"  );
 $config->define( "data_ipv2_flip=s"  );
-$config->define( "data_etoday_hexcode=s"  );
-$config->define( "data_etoday_multiply=s"  );
-$config->define( "data_etoday_measure=s"  );
-$config->define( "data_etoday_index=s"  );
-$config->define( "data_etoday_descr=s"  );
-$config->define( "data_etoday_flip=s"  );
+$config->define( "data_emonth_hexcode=s"  );
+$config->define( "data_emonth_multiply=s"  );
+$config->define( "data_emonth_measure=s"  );
+$config->define( "data_emonth_index=s"  );
+$config->define( "data_emonth_descr=s"  );
+$config->define( "data_emonth_flip=s"  );
 $config->define( "data_iac_hexcode=s"  );
 $config->define( "data_iac_multiply=s"  );
 $config->define( "data_iac_measure=s"  );
@@ -160,14 +160,14 @@ if ($config->flags_debug) {
                 FLIP     => $config->data_ipv2_flip,
                 DESCR    => $config->data_ipv2_descr,
 	},
-	ETODAY => {
-                HEXCODE  => $config->data_etoday_hexcode,
-                MULTIPLY => $config->data_etoday_multiply,
-                MEAS     => $config->data_etoday_measure,
-                INDEX    => $config->data_etoday_index,
+	EMONTH => {
+                HEXCODE  => $config->data_emonth_hexcode,
+                MULTIPLY => $config->data_emonth_multiply,
+                MEAS     => $config->data_emonth_measure,
+                INDEX    => $config->data_emonth_index,
                 VALUE    => 0,
-                DESCR    => $config->data_etoday_descr,
-		FLIP     => $config->data_etoday_flip,
+                DESCR    => $config->data_emonth_descr,
+		FLIP     => $config->data_emonth_flip,
 	},
 	IAC    => {
                 HEXCODE  => $config->data_iac_hexcode,
@@ -449,7 +449,7 @@ sub parseData() {
   }
   my $hexData = shift;
   #print "hexData: $hexData\n";
-  my $dataToFollow = hex( substr( $hexData, $config->hex_data_to_follow_index*2, 2 ) );
+  my $dataToFollow = hex( substr( $hexData, $config->hex_data_to_follow_index*3, 2 ) );
   #print "dataToFollow: $dataToFollow\n";
   my $startIndex = ( $config->hex_data_to_follow_index + 1 )*2;
   #print "startIndex: $startIndex\n";
@@ -457,10 +457,11 @@ sub parseData() {
   #print "numOfChars: $numOfChars\n";
   my $data = substr( $hexData, $startIndex, $numOfChars );
   #print "data: $data\n";
-  my $lastEtoday = $HoH{ETODAY}{VALUE};
+  my $lastEmonth = $HoH{EMONTH}{VALUE};
    
   # split hex string into an array of 4char hex strings
   @d = ( $data =~ m/..?.?.?/g );
+  @e = ( $data =~ m/..?/g );
 
   my $finalOutput="";
 
@@ -471,7 +472,11 @@ sub parseData() {
          if ( $HoH{$key}{FLIP} eq "1" ) {
            $HoH{$key}{VALUE} = hex( join '', reverse split /(..)/, $d[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
          } else {
-           $HoH{$key}{VALUE} = hex( $d[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
+		if ($HoH{EMONTH}) {
+			$HoH{$key}{VALUE} = hex( $e[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
+		} else {
+	        	$HoH{$key}{VALUE} = hex( $d[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
+		}
          }
 	 if ($config->flags_pvoutput) {
 	 	 #do nothing here
