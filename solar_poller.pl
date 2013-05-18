@@ -93,6 +93,12 @@ $config->define( "data_emonth_measure=s"  );
 $config->define( "data_emonth_index=s"  );
 $config->define( "data_emonth_descr=s"  );
 $config->define( "data_emonth_flip=s"  );
+$config->define( "data_lmonth_hexcode=s"  );
+$config->define( "data_lmonth_multiply=s"  );
+$config->define( "data_lmonth_measure=s"  );
+$config->define( "data_lmonth_index=s"  );
+$config->define( "data_lmonth_descr=s"  );
+$config->define( "data_lmonth_flip=s"  );
 $config->define( "data_iac_hexcode=s"  );
 $config->define( "data_iac_multiply=s"  );
 $config->define( "data_iac_measure=s"  );
@@ -169,6 +175,15 @@ if ($config->flags_debug) {
                 DESCR    => $config->data_emonth_descr,
 		FLIP     => $config->data_emonth_flip,
 	},
+        LMONTH => {
+                HEXCODE  => $config->data_lmonth_hexcode,
+                MULTIPLY => $config->data_lmonth_multiply,
+                MEAS     => $config->data_lmonth_measure,
+                INDEX    => $config->data_lmonth_index,
+                VALUE    => 0,
+                DESCR    => $config->data_lmonth_descr,
+                FLIP     => $config->data_lmonth_flip,
+        },
 	IAC    => {
                 HEXCODE  => $config->data_iac_hexcode,
                 MULTIPLY => $config->data_iac_multiply,
@@ -461,6 +476,7 @@ sub parseData() {
    
   # split hex string into an array of 4char hex strings
   @d = ( $data =~ m/..?.?.?/g );
+  # split hex string into an array of 2char hex strings
   @e = ( $data =~ m/..?/g );
 
   my $finalOutput="";
@@ -472,8 +488,8 @@ sub parseData() {
          if ( $HoH{$key}{FLIP} eq "1" ) {
            $HoH{$key}{VALUE} = hex( join '', reverse split /(..)/, $d[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
          } else {
-		if ($HoH{EMONTH}) {
-			$HoH{$key}{VALUE} = hex( $e[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
+		if (($HoH{EMONTH})||($HoH{LMONTH})) {
+			$HoH{$key}{VALUE} = hex( (($e[$HoH{$key}{INDEX}+1] ) * $HoH{$key}{MULTIPLY}).(( $e[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY}));
 		} else {
 	        	$HoH{$key}{VALUE} = hex( $d[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
 		}
