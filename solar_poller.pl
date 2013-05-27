@@ -489,7 +489,7 @@ sub parseData() {
            $HoH{$key}{VALUE} = hex( join '', reverse split /(..)/, $d[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
          } else {
 		if (($HoH{EMONTH})||($HoH{LMONTH})) {
-			$HoH{$key}{VALUE} = hex( (($e[$HoH{$key}{INDEX}+1] ) * $HoH{$key}{MULTIPLY}).(( $e[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY}));
+			$HoH{$key}{VALUE} = hex( ($e[$HoH{$key}{INDEX}+1]).($e[$HoH{$key}{INDEX}]));
 		} else {
 	        	$HoH{$key}{VALUE} = hex( $d[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
 		}
