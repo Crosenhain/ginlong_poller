@@ -4,6 +4,7 @@ use warnings;
 use AppConfig;  # used to read from a config file
 use WWW::Curl::Easy;
 use POSIX qw(strftime);
+use Data::Dumper;
 
 $| = 1;         # don't let Perl buffer I/O
 
@@ -119,7 +120,7 @@ $config->define( "data_fac_descr=s"  );
 $config->define( "data_fac_flip=s"  );
 
 # fill variables by reading configuration file
-$config->file( "config.ini" ) || die "FAILED to open and/or read config file: config.ini\n";
+$config->file( "/usr/local/bin/config.ini" ) || die "FAILED to open and/or read config file: config.ini\n";
 
 if ($config->flags_debug) {
   print "debug=" . $config->flags_debug ;
@@ -464,45 +465,73 @@ sub parseData() {
   }
   my $hexData = shift;
   #print "hexData: $hexData\n";
-  my $dataToFollow = hex( substr( $hexData, $config->hex_data_to_follow_index*3, 2 ) );
+  if ($config->flags_debug) {
+	print Dumper($hexData);
+  }
+  my $dataToFollow = hex( substr( $hexData, $config->hex_data_to_follow_index*3, 3 ) );
+  if ($config->flags_debug) {
+	print "* Data to follow:\n";
+	print Dumper($config->hex_data_to_follow_index);
+        print Dumper($dataToFollow);
+  }
   #print "dataToFollow: $dataToFollow\n";
   my $startIndex = ( $config->hex_data_to_follow_index + 1 )*2;
+  if ($config->flags_debug) {
+	print "* startIndex:\n";
+        print Dumper($startIndex);
+  }
   #print "startIndex: $startIndex\n";
   my $numOfChars = $dataToFollow * 2;
+  if ($config->flags_debug) {
+	print "* numOfChars:\n";
+        print Dumper($numOfChars);
+  }
   #print "numOfChars: $numOfChars\n";
   my $data = substr( $hexData, $startIndex, $numOfChars );
   #print "data: $data\n";
   my $lastEmonth = $HoH{EMONTH}{VALUE};
-   
+  if ($config->flags_debug) {
+	print "* Data: \n";
+	print Dumper($data); 
+  }
   # split hex string into an array of 4char hex strings
   @d = ( $data =~ m/..?.?.?/g );
-  # split hex string into an array of 2char hex strings
+  # split hex string into an array of 2char hex strings so we can get this and last months energy totals
   @e = ( $data =~ m/..?/g );
 
   my $finalOutput="";
 
+  if ($config->flags_debug) {
+	print "* emonth data\n";
+	print Dumper($HoH{EMONTH});
+  }
+
   # display data values - sort %HoH by INDEX
   for $key ( sort {$HoH{$a}{INDEX} <=> $HoH{$b}{INDEX} } keys ( %HoH ) ) {
        if ( $HoH{$key}{INDEX} ne "-1" ) {
-         # Ginlong inverters need most of the hex strings flipped, eg 4b2c becomes 2c4b
+         # Ginlong inverters need some of the hex strings flipped, eg 4b2c becomes 2c4b
          if ( $HoH{$key}{FLIP} eq "1" ) {
            $HoH{$key}{VALUE} = hex( join '', reverse split /(..)/, $d[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
          } else {
 		if (($HoH{EMONTH})||($HoH{LMONTH})) {
-			$HoH{$key}{VALUE} = hex( ($e[$HoH{$key}{INDEX}+1]).($e[$HoH{$key}{INDEX}]));
+			$HoH{$key}{VALUE} = hex( (($e[$HoH{$key}{INDEX}+1] )).(( $e[$HoH{$key}{INDEX}] ) ));
 		} else {
 	        	$HoH{$key}{VALUE} = hex( $d[$HoH{$key}{INDEX}] ) * $HoH{$key}{MULTIPLY};
 		}
          }
+
 	 if ($config->flags_pvoutput) {
 	 	 #do nothing here
 	 } else {
-	         #printf " %s:%s", $key, $HoH{$key}{VALUE}, $HoH{$key}{MEAS} ;
-		$finalOutput .= $key.":".$HoH{$key}{VALUE}." ";
+	        #printf " %s:%s", $key, $HoH{$key}{VALUE}, $HoH{$key}{MEAS} ;
+		#$finalOutput .= $key.":".$HoH{$key}{VALUE}." ";
+		$tmpkey = $HoH{$key}{DESCR};
+		$tmpkey =~ s/\s*//g;
+		$finalOutput .= $tmpkey." ".$HoH{$key}{VALUE}."\n";
 	 }
        }
   }
-  my $wattage = $HoH{VAC}{VALUE} * $HoH{IAC}{VALUE};
+  my $wattage = "Wattage ". $HoH{VAC}{VALUE} * $HoH{IAC}{VALUE};
   if ($config->flags_pvoutput) {
 	my $pvdata = "data=".(strftime "%Y%m%d", localtime).",".$wattage;
   	#we're using curl to send the data to pvoutput
@@ -526,8 +555,16 @@ sub parseData() {
 	}
   } else {
   	#printf " WAC:%s", $wattage ;
-	$finalOutput .= "WAC:".$wattage;
+	#$finalOutput .= "WAC:".$wattage;
+	$finalOutput .= $wattage."\n";
 	printf $finalOutput;
+	#my $outputfilesolar="/usr/local/bin/solar_poller_output";
+	#if (($HoH{VAC}{VALUE}!=0)&&($HoH{IAC}{VALUE}!=0)&&($HoH{LMONTH}{VALUE}!=0)&&($HoH{EMONTH}{VALUE}!=0)) {
+	#	open(FILE, ">$outputfilesolar");
+	#	print FILE $finalOutput;
+	#	close FILE;
+	#}
+	
   }
 
 } #end parseData

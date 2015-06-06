@@ -1,0 +1,3 @@
+#!/bin/sh
+echo '<<<solar>>>'
+/usr/local/bin/solar_poller.pl

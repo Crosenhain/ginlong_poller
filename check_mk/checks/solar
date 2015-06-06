@@ -1,0 +1,249 @@
+def inventory_solar_wattage(info):
+	inventory = []
+	
+	for line in info:
+		desc = line[0] # Describes what we're getting
+		value = line[1] # The actual value we care about
+
+		if desc == "Wattage":
+			inventory.append( (desc, None) )
+
+	return inventory
+
+def check_solar_wattage(item, params, info):
+	for line in info:
+		if line[0] == "Wattage":
+			perfdata = [ ("wattage", float(line[1])) ]
+			return (0, "Solar output is %sW" % line[1], perfdata)
+
+check_info["solar.wattage"] = {
+	'check_function':	check_solar_wattage,
+	'inventory_function':	inventory_solar_wattage,
+	'service_description':	'Solar %s',
+	'has_perfdata':		True,
+}
+
+def inventory_solar_panel1voltage(info):
+        inventory = []
+
+        for line in info:
+                desc = line[0] # Describes what we're getting
+                value = line[1] # The actual value we care about
+
+                if desc == "Panel1Voltage":
+                        inventory.append( (desc, None) )
+
+        return inventory
+
+def check_solar_panel1voltage(item, params, info):
+        for line in info:
+                if line[0] == "Panel1Voltage":
+                        perfdata = [ ("Panel 1 Voltage", float(line[1])) ]
+                        return (0, "Panel 1 output voltage is %sV" % line[1], perfdata)
+
+check_info["solar.panel1voltage"] = {
+        'check_function':       check_solar_panel1voltage,
+        'inventory_function':   inventory_solar_panel1voltage,
+        'service_description':  'Solar %s',
+        'has_perfdata':         True,
+}
+
+def inventory_solar_panel2voltage(info):
+        inventory = []
+
+        for line in info:
+                desc = line[0] # Describes what we're getting
+                value = line[1] # The actual value we care about
+
+                if desc == "Panel2Voltage":
+                        inventory.append( (desc, None) )
+
+        return inventory
+
+def check_solar_panel2voltage(item, params, info):
+        for line in info:
+                if line[0] == "Panel2Voltage":
+                        perfdata = [ ("Panel 2 Voltage", float(line[1])) ]
+                        return (0, "Panel 2 output voltage is %sV" % line[1], perfdata)
+
+check_info["solar.panel2voltage"] = {
+        'check_function':       check_solar_panel2voltage,
+        'inventory_function':   inventory_solar_panel2voltage,
+        'service_description':  'Solar %s',
+        'has_perfdata':         True,
+}
+
+def inventory_solar_panel1current(info):
+        inventory = []
+
+        for line in info:
+                desc = line[0] # Describes what we're getting
+                value = line[1] # The actual value we care about
+
+                if desc == "Panel1DCCurrent":
+                        inventory.append( (desc, None) )
+
+        return inventory
+
+def check_solar_panel1current(item, params, info):
+        for line in info:
+                if line[0] == "Panel1DCCurrent":
+                        perfdata = [ ("Panel 1 Current", float(line[1])) ]
+                        return (0, "Panel 1 output current is %sA" % line[1], perfdata)
+
+check_info["solar.panel1current"] = {
+        'check_function':       check_solar_panel1current,
+        'inventory_function':   inventory_solar_panel1current,
+        'service_description':  'Solar %s',
+        'has_perfdata':         True,
+}
+
+def inventory_solar_panel2current(info):
+        inventory = []
+
+        for line in info:
+                desc = line[0] # Describes what we're getting
+                value = line[1] # The actual value we care about
+
+                if desc == "Panel2DCCurrent":
+                        inventory.append( (desc, None) )
+
+        return inventory
+
+def check_solar_panel2current(item, params, info):
+        for line in info:
+                if line[0] == "Panel2DCCurrent":
+                        perfdata = [ ("Panel 2 Current", float(line[1])) ]
+                        return (0, "Panel 2 output current is %sA" % line[1], perfdata)
+
+check_info["solar.panel2current"] = {
+        'check_function':       check_solar_panel2current,
+        'inventory_function':   inventory_solar_panel2current,
+        'service_description':  'Solar %s',
+        'has_perfdata':         True,
+}
+
+def inventory_solar_gridvoltage(info):
+        inventory = []
+
+        for line in info:
+                desc = line[0] # Describes what we're getting
+                value = line[1] # The actual value we care about
+
+                if desc == "GridVoltage":
+                        inventory.append( (desc, None) )
+
+        return inventory
+
+def check_solar_gridvoltage(item, params, info):
+        for line in info:
+                if line[0] == "GridVoltage":
+                        perfdata = [ ("Grid Voltage", float(line[1])) ]
+                        return (0, "Grid voltage is %sV" % line[1], perfdata)
+
+check_info["solar.gridvoltage"] = {
+        'check_function':       check_solar_gridvoltage,
+        'inventory_function':   inventory_solar_gridvoltage,
+        'service_description':  'Solar %s',
+        'has_perfdata':         True,
+}
+
+def inventory_solar_gridcurrent(info):
+        inventory = []
+
+        for line in info:
+                desc = line[0] # Describes what we're getting
+                value = line[1] # The actual value we care about
+
+                if desc == "GridCurrent":
+                        inventory.append( (desc, None) )
+
+        return inventory
+
+def check_solar_gridcurrent(item, params, info):
+        for line in info:
+                if line[0] == "GridCurrent":
+                        perfdata = [ ("Grid Current", float(line[1])) ]
+                        return (0, "Grid current is %sA" % line[1], perfdata)
+
+check_info["solar.gridcurrent"] = {
+        'check_function':       check_solar_gridcurrent,
+        'inventory_function':   inventory_solar_gridcurrent,
+        'service_description':  'Solar %s',
+        'has_perfdata':         True,
+}
+
+def inventory_solar_gridfrequency(info):
+        inventory = []
+
+        for line in info:
+                desc = line[0] # Describes what we're getting
+                value = line[1] # The actual value we care about
+
+                if desc == "GridFrequency":
+                        inventory.append( (desc, None) )
+
+        return inventory
+
+def check_solar_gridfrequency(item, params, info):
+        for line in info:
+                if line[0] == "GridFrequency":
+                        perfdata = [ ("Grid Frequency", float(line[1])) ]
+                        return (0, "Grid frequency is %sHz" % line[1], perfdata)
+
+check_info["solar.gridfrequency"] = {
+        'check_function':       check_solar_gridfrequency,
+        'inventory_function':   inventory_solar_gridfrequency,
+        'service_description':  'Solar %s',
+        'has_perfdata':         True,
+}
+
+def inventory_solar_energy(info):
+        inventory = []
+
+        for line in info:
+                desc = line[0] # Describes what we're getting
+                value = line[1] # The actual value we care about
+
+                if desc == "AccumulatedEnergyThisMonth":
+                        inventory.append( (desc, None) )
+
+        return inventory
+
+def check_solar_energy(item, params, info):
+        for line in info:
+                if line[0] == "AccumulatedEnergyThisMonth":
+                        perfdata = [ ("Accumulated Energy", float(line[1])) ]
+                        return (0, "Accumulated Energy output is %skWh" % line[1], perfdata)
+
+check_info["solar.energy"] = {
+        'check_function':       check_solar_energy,
+        'inventory_function':   inventory_solar_energy,
+        'service_description':  'Solar %s',
+        'has_perfdata':         True,
+}
+
+def inventory_solar_energyl(info):
+        inventory = []
+
+        for line in info:
+                desc = line[0] # Describes what we're getting
+                value = line[1] # The actual value we care about
+
+                if desc == "AccumulatedEnergyLastMonth":
+                        inventory.append( (desc, None) )
+
+        return inventory
+
+def check_solar_energyl(item, params, info):
+        for line in info:
+                if line[0] == "AccumulatedEnergyLastMonth":
+                        perfdata = [ ("Accumulated Energy last month", float(line[1])) ]
+                        return (0, "Accumulated Energy output last month is %skWh" % line[1], perfdata)
+
+check_info["solar.energyl"] = {
+        'check_function':       check_solar_energyl,
+        'inventory_function':   inventory_solar_energyl,
+        'service_description':  'Solar %s',
+        'has_perfdata':         True,
+}
